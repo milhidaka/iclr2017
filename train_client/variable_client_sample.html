@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Variable client sample</title>
+    <script src="jquery-3.0.0.min.js"></script>
+    <script src="variable_client.js"></script>
+    <script src="variable_client_sample.js"></script>
+  </head>
+  <body>
+    Read a variable and write (copy) to another variable
+    <form>
+      Variable server uri: <input type="text" name="server_uri">
+      Variable id to read: <input type="text" name="read_id">
+      Variable id to write: <input type="text" name="write_id">
+      <button id="run_copy">Run copy</button>
+
+      <textarea id="log" rows="20" cols="80"></textarea>
+    </form>
+  </body>
+</html>
