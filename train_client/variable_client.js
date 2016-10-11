@@ -4,7 +4,7 @@ var VariableClient = null;
 (function () {
   VariableClient = function (url_base, split_size) {
     if (!split_size) {
-      split_size = 1024 * 1024 * 10;
+      split_size = 1024 * 1024 * 100;
     }
     this.split_size = split_size;
     this.url_base = url_base;

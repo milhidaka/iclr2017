@@ -8,6 +8,7 @@ import dist_train_config
 import dist_params
 import varserverapi
 from dataset_loader import DatasetLoader
+from weight_pack import WeightPack
 logging.basicConfig(level=logging.DEBUG)
 
 train_manager = None
@@ -15,11 +16,12 @@ class TrainManager():
     def __init__(self):
         self.clients = []
         self.t = 0
-        self.dataset_loader = DatasetLoader(dist_params.DATASET_PREFIX,
-            dist_params.DATA_RAW_SHAPE, dist_params.DATA_AUG_SHAPE)
+        self.dataset_loader = DatasetLoader.init_by_setting()
         self.varserver_db = varserverapi.open_db()
 
-        self.optimizer = Optimizer()
+        packer = WeightPack(json.load(open(dist_params.WEIGHT_PACK_PARAM_FILE)))
+        initial_weights = packer.unpack(open(dist_params.INITIAL_WEIGHT).read())
+        self.optimizer = Optimizer(initial_weights, packer, lr=1e-2)
         self.weight_id = None
         self.gradient_ids = []
         self.n_gradient_gathered = 0
@@ -41,11 +43,13 @@ class TrainManager():
         logging.info("Client {} command {}".format(client.client_id, command["command"]))
         if command["command"] == "stored_gradient":
             self.n_gradient_gathered += 1
+            self.gradient_multipliers[command["gradient_id"]] = command["gradient_multiplier"]
+            self.gradient_batch_sizes[command["gradient_id"]] = command["batch_size"]
             if self.n_gradient_gathered == dist_params.N_CLIENTS:
                 # all gradients gathered
                 # calculate new weight
                 logging.info("Updating weight by gradients {}".format(self.gradient_ids))
-                self.optimizer.update_weight(self.varserver_db, self.gradient_ids)
+                self.optimizer.update_weight(self.varserver_db, self.gradient_ids, self.gradient_multipliers, self.gradient_batch_sizes)
                 self.t += 1
                 self.start_iteration()
     
@@ -57,6 +61,8 @@ class TrainManager():
 
     def start_iteration(self):
         self.n_gradient_gathered = 0
+        self.gradient_multipliers = {}
+        self.gradient_batch_sizes = {}
         self.weight_id = self.optimizer.store_weight(self.varserver_db)
         logging.info("Start iteration {} weight {}".format(self.t, self.weight_id))
         self.gradient_ids = []
@@ -86,21 +92,40 @@ class TrainManager():
             client.sendMessage(unicode(json.dumps({"command":"read_data", "vars":{"data":data_id, "label":label_id}})))
 
 class Optimizer():
-    def __init__(self):
-        self.weight = np.random.rand(1000*1000*100).astype(np.float32)
+    def __init__(self, weights, packer, lr=1e-2, momentum=0.9):
+        self.weights = weights
+        self.packer = packer
+        self.lr = lr
+        self.momentum = momentum
+        self.last_delta = {name:np.zeros_like(w) for name, w in weights.items()}
     
     def store_weight(self, varserver_db):
-        return varserverapi.reserve_write_var(varserver_db, self.weight.tobytes())
+        return varserverapi.reserve_write_var(varserver_db, self.packer.pack(self.weights))
     
-    def update_weight(self, varserver_db, gradient_ids):
-        acc_gradient = np.zeros(self.weight.shape, dtype=np.float32)
+    def update_weight(self, varserver_db, gradient_ids, gradient_multipliers, batch_sizes):
+        gradients = {}
+        total_batch_size = 0
+        # sum up all gradients
         for gradient_id in gradient_ids:
             gradient_bin = varserverapi.read_var(varserver_db, gradient_id)
-            gradient_ary = np.fromstring(gradient_bin, dtype=np.float32)
-            gradient_ary = gradient_ary.reshape(acc_gradient.shape)
-            acc_gradient += gradient_ary
-        self.weight += acc_gradient#TODO: sgd
-        logging.info("gradient sum: {}".format(np.sum(self.weight)))
+            client_gradients = self.packer.unpack(gradient_bin)
+            batch_size = batch_sizes[gradient_id]
+            gradient_multiplier = gradient_multipliers[gradient_id]
+            total_batch_size += batch_size
+            for name, cg in client_gradients.items():
+                logging.info("sum: {}, {}".format(np.sum(cg), name))
+                cg *= (float(batch_size) / gradient_multiplier)
+                if name in gradients:
+                    gradients[name] += cg
+                else:
+                    gradients[name] = cg
+        # do update
+        for name, g in gradients.items():
+            delta = self.last_delta[name]
+            delta *= self.momentum
+            delta += g * (-self.lr / total_batch_size)
+            self.weights[name] += delta
+            logging.info("weight std: {}".format(np.std(self.weights[name])))
 
 class ClientConnection(WebSocket):
     def __init__(self, *args, **kwargs):

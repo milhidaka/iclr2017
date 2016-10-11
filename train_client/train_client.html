@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Dummy training client</title>
+    <script src="jquery-3.1.1.min.js"></script>
+    <script src="https://raw.githubusercontent.com/YuzuJS/setImmediate/master/setImmediate.js"></script>
+    <script src="milsushi2_cl.js"></script>
+    <script src="milsukiyaki2.js"></script>
+    <script src="weight_pack.js"></script>
+    <script src="variable_client.js"></script>
+    <script src="train_client.js"></script>
+  </head>
+  <body>
+    Sukiyaki2 browser distributed training client
+    <form>
+      Training setting: <input type="text" name="netdef_uri" value="/vgg11_browser.json"> <input type="checkbox" name="use_cl" checked>CL <button id="setup_net">Setup network</button><br>
+      Control server uri: <input type="text" name="control_server_uri" value="ws://hishiko:2525">
+      Variable server uri: <input type="text" name="variable_server_uri" value="http://hishiko:2526">
+      <button id="run_training">Run training</button>
+      <br>
+      <textarea id="log" rows="20" cols="80"></textarea>
+    </form>
+  </body>
+</html>
