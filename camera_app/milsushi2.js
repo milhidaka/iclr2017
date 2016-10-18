@@ -1,0 +1,1 @@
+../../sushi2/browser/milsushi2.js

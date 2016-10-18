@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Sukiyaki2 Camera Digit Recognition</title>
+  <script src="jquery-3.1.1.min.js"></script>
+  <script src="setImmediate.js"></script>
+  <script src="milsushi2.js"></script>
+  <script src="milsukiyaki2.js"></script>
+  <script src="ui.js"></script>
+  <script src="recognize.js"></script>
+</head>
+
+<body>
+  <form>
+    <h1>Digit recognition from camera</h1>
+    <div>
+      Input: <video id="camera-in" width="256" height="256" autoplay="1"></video> => Predicted: <span id="result" style="font-size: 10em">-</span>
+    </div>
+    <div>
+      <textarea id="msg" cols="40" rows="4"></textarea>
+    </div>
+    <button type="button" id="load-net">Load Network</button>
+    <button type="button" id="start-camera">Start Camera</button>
+    Resized image: <canvas id="recognize-in" width="28" height="28"></canvas>
+    <button type="button" id="video-capture">Capture</button>
+    <button type="button" id="recognize">Recognize</button>
+    <button type="button" id="autorecognize">Auto Recognize</button>
+    
+  </form>
+</body>
+
+</html>
