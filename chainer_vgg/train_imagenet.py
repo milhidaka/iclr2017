@@ -64,6 +64,7 @@ parser.add_argument('--initmodel', default='',
                     help='Initialize the model from given file')
 parser.add_argument('--resume', default='',
                     help='Resume the optimization from snapshot')
+parser.add_argument('--compress_gradient', action='store_true')
 parser.add_argument('--test', dest='test', action='store_true')
 parser.add_argument('--lr', help='learning rate', type=float, default=1e-2)
 parser.add_argument('--div', help='batch division count', type=int, default=1)
@@ -127,7 +128,11 @@ if args.gpu >= 0:
     model.to_gpu()
 
 # Setup optimizer
-optimizer = optimizers.MomentumSGD(lr=args.lr, momentum=0.9)
+optimizer_class = optimizers.MomentumSGD
+if args.compress_gradient:
+    from optimizer_sgd_compress import MomentumSGDCompress
+    optimizer_class = MomentumSGDCompress
+optimizer = optimizer_class(lr=args.lr, momentum=0.9)
 optimizer.setup(model)
 optimizer.add_hook(chainer.optimizer.WeightDecay(5e-4))
 
