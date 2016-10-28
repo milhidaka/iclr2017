@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Sukiyaki2 distributed training client</title>
+    <title>Sukiyaki2 single training client</title>
     <script src="jquery-3.1.1.min.js"></script>
     <script src="setImmediate.js"></script>
     <script src="typedarray_fill.js"></script>
@@ -10,10 +10,10 @@
     <script src="milsukiyaki2.js"></script>
     <script src="weight_pack.js"></script>
     <script src="variable_client.js"></script>
-    <script src="train_client.js"></script>
+    <script src="single_train_client.js"></script>
   </head>
   <body>
-    Sukiyaki2 browser distributed training client
+    Sukiyaki2 browser single training client
     <form>
       Training setting: <input type="text" name="netdef_uri" value="/vgg11_browser.json"> <input type="checkbox" name="use_cl" checked>CL Batch division size:<input type="text" name="batch_division_size" value="128"><button id="setup_net">Setup network</button><br>
       Control server uri: <input type="text" name="control_server_uri" value="ws://hishiko:2525">

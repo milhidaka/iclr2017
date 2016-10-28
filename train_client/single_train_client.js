@@ -44,7 +44,7 @@ function setup_net_f() {
       if (use_cl) {
         net.to_cl();
       }
-      opt = new Sukiyaki.Optimizers.OptimizerSGD(net, 0.1);
+      opt = new Sukiyaki.Optimizers.OptimizerMomentumSGD(net, 1e-3);
       net.phase = 'train';
       write_log("initializing net finished");
     });
@@ -94,7 +94,7 @@ function command_read_data(command) {
       if (vars_to_read.length > 0) {
         read_next();
       } else {
-        write_log("Completed reading data " + command.vars);
+        write_log("Completed reading data " + JSON.stringify(command.vars));
         data_queue.push(read_data);
       }
     });
@@ -106,9 +106,13 @@ function command_read_data(command) {
 //var current_weight = null;
 var current_gradient = null;
 var current_gradient_id = null;
+var remaining_iters = 0;
+var lr = 0;
 function command_calc_gradient(command) {
   var weight_id = command.vars.weight;
   current_gradient_id = command.vars.gradient;
+  remaining_iters = command.iterations;
+  lr = command.lr;
   variable_client.read(weight_id, function (err, buf) {
     console.log('deserializing weight ' + (new Date()));
     packer.unpack(net, buf, false);
@@ -134,6 +138,7 @@ function wait_data_calc_gradient() {
   current_batch_division = Math.ceil(current_batch_size / batch_division_size);
 
   var data_sample_size = shape_info.data[0] * shape_info.data[1] * shape_info.data[2];
+  opt.lr = lr / current_batch_division;//gradient is added in each division, so reduce learning rate to offset
   opt.zero_grads();
   console.log('forward-backward start ' + (new Date()));
   var batch_div_i = 0;
@@ -158,10 +163,17 @@ function wait_data_calc_gradient() {
         batch_div_i++;
         if (batch_div_i == current_batch_division) {
           // end all division
-          console.log('forward-backward end ' + (new Date()));
-          current_gradient = packer.pack(net, true);//arraybuffer
+          opt.do_update();
           opt.release();
-          setImmediate(send_gradient, 0);
+          console.log('forward-backward end ' + (new Date()));
+          remaining_iters--;
+          if (remaining_iters <= 0) {
+            current_gradient = packer.pack(net);
+            send_gradient();
+          } else {
+            control_socket.send(JSON.stringify({ 'command': 'iteration_finished', 'loss': current_loss, 'remaining_iters': remaining_iters }));
+            wait_data_calc_gradient();
+          }
         } else {
           net.release();
           forward_next();
@@ -177,7 +189,7 @@ function wait_data_calc_gradient() {
 function send_gradient() {
   write_log("Sending gradient " + current_gradient_id);
   variable_client.write(current_gradient, current_gradient_id, function (err, id) {
-    control_socket.send(JSON.stringify({ 'command': 'stored_gradient', 'gradient_id': current_gradient_id, 'batch_size': current_batch_size, 'gradient_multiplier': current_batch_division, 'loss': current_loss }));
+    control_socket.send(JSON.stringify({ 'command': 'stored_gradient', 'gradient_id': current_gradient_id, 'loss': current_loss }));
     write_log("Sent gradient message");
   });
 }

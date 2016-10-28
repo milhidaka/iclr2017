@@ -10,8 +10,8 @@ var WeightPack = null;
         this._unpack = unpack_raw;
         break;
       case 'eightbit':
-        this._pack = pack_eightbit;
-        this._unpack = unpack_eightbit;
+        this._pack = Sukiyaki.DettmersWeightCompression.compress_8bit;
+        this._unpack = Sukiyaki.DettmersWeightCompression.decompress_8bit;
         break;
     }
   };

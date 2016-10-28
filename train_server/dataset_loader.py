@@ -25,8 +25,7 @@ class DatasetLoader():
             self.mean = None
 
     @classmethod
-    def init_by_setting(cls):
-        import dist_params
+    def init_by_setting(cls, dist_params):
         return cls(dist_params.DATASET_PREFIX,
             dist_params.DATA_RAW_SHAPE,
             dist_params.DATA_AUG_SHAPE,

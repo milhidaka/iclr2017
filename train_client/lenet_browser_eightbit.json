@@ -1,0 +1,154 @@
+{
+  "weight_pack": {"param_sizes":[{"layer":"conv1","train_param":"weight","delta_param":"delta_weight","size":504,"offset":0},{"layer":"conv1","train_param":"bias","delta_param":"delta_bias","size":24,"offset":504},{"layer":"conv2","train_param":"weight","delta_param":"delta_weight","size":25004,"offset":528},{"layer":"conv2","train_param":"bias","delta_param":"delta_bias","size":54,"offset":25532},{"layer":"fc3","train_param":"weight","delta_param":"delta_weight","size":400004,"offset":25586},{"layer":"fc3","train_param":"bias","delta_param":"delta_bias","size":504,"offset":425590},{"layer":"fc4","train_param":"weight","delta_param":"delta_weight","size":5004,"offset":426094},{"layer":"fc4","train_param":"bias","delta_param":"delta_bias","size":14,"offset":431098}],"total_size":431112,"format":"eightbit"},
+
+  "shape_info": {
+    "data": [
+      28,
+      28,
+      1
+    ],
+    "label": [
+      1
+    ]
+  },
+  "net": [
+  {
+    "name": "conv1",
+    "type": "convolution_2d",
+    "params": {
+      "in_size": 1,
+      "out_size": 20,
+      "ksize": 5,
+      "stride": 1,
+      "pad": 0
+    },
+    "inputs": [
+      "data"
+    ],
+    "outputs": [
+      "conv1"
+    ]
+  },
+  {
+    "name": "pool1",
+    "type": "pooling_2d",
+    "params": {
+      "type": "max",
+      "ksize": 2,
+      "stride": 2,
+      "pad": 0
+    },
+    "inputs": [
+      "conv1"
+    ],
+    "outputs": [
+      "pool1"
+    ]
+  },
+  {
+    "name": "conv2",
+    "type": "convolution_2d",
+    "params": {
+      "in_size": 20,
+      "out_size": 50,
+      "ksize": 5,
+      "stride": 1,
+      "pad": 0
+    },
+    "inputs": [
+      "pool1"
+    ],
+    "outputs": [
+      "conv2"
+    ]
+  },
+  {
+    "name": "pool2",
+    "type": "pooling_2d",
+    "params": {
+      "type": "max",
+      "ksize": 2,
+      "stride": 2,
+      "pad": 0
+    },
+    "inputs": [
+      "conv2"
+    ],
+    "outputs": [
+      "pool2"
+    ]
+  },
+  {
+    "name": "fc3",
+    "type": "linear",
+    "params": {
+      "in_shape": [
+        4,
+        4,
+        50
+      ],
+      "out_size": 500
+    },
+    "inputs": [
+      "pool2"
+    ],
+    "outputs": [
+      "fc3"
+    ]
+  },
+  {
+    "name": "relu3",
+    "type": "relu",
+    "params": {},
+    "inputs": [
+      "fc3"
+    ],
+    "outputs": [
+      "relu3"
+    ]
+  },
+  {
+    "name": "fc4",
+    "type": "linear",
+    "params": {
+      "in_shape": [
+        500
+      ],
+      "out_size": 10
+    },
+    "inputs": [
+      "relu3"
+    ],
+    "outputs": [
+      "pred"
+    ]
+  },
+  {
+    "name": "l",
+    "type": "softmax_cross_entropy",
+    "params": {},
+    "inputs": [
+      "pred",
+      "label"
+    ],
+    "outputs": [
+      "loss"
+    ]
+  },
+  {
+    "name": "a",
+    "type": "accuracy",
+    "params": {},
+    "inputs": [
+      "pred",
+      "label"
+    ],
+    "outputs": [
+      "accuracy"
+    ],
+    "phase": [
+      "test"
+    ]
+  }
+]
+}

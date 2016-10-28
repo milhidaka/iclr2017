@@ -4,7 +4,7 @@
 import sys
 import os
 import argparse
-import train_loop
+import single_train_loop
 
 def run():
     parser = argparse.ArgumentParser()
@@ -15,7 +15,7 @@ def run():
     # launch var server
     # launch static content server
     # start training loop
-    train_loop.train_loop(initial_weight_path=args.initmodel, weight_save_path_tmpl=args.savetmpl, initial_t=args.initt)
+    single_train_loop.train_loop(initial_weight_path=args.initmodel, weight_save_path_tmpl=args.savetmpl, initial_t=args.initt)
 
 if __name__ == '__main__':
     run()
