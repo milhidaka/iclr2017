@@ -1,0 +1,23 @@
+<html>
+
+<head>
+	<title>Sukiyaki2 benchmark</title>
+  <meta charset="utf-8">
+  <script src="jquery-3.1.1.min.js"></script>
+  <script src="setImmediate.js"></script>
+	<script src="typedarray_fill.js"></script>
+	<script src="milsushi2_cl.js"></script>
+	<script src="milsukiyaki2.js"></script>
+	<script src="train_sukiyaki_browser.js"></script>
+</head>
+
+<body>
+	<form>
+		<button type="button" onclick="return load_dataset();">Load Dataset</button>
+		<button type="button" onclick="return bench_browser();">Benchmark</button>
+		<input type="checkbox" name="use_cl" checked>CL</input><br>
+    <span id="bench_result"></span>
+	</form>
+</body>
+
+</html>

@@ -1,0 +1,1 @@
+../../sukiyaki2/browser/milsukiyaki2.js
