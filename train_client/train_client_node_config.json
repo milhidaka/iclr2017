@@ -1,0 +1,7 @@
+{
+  "netdef_uri": "http://hishiko:8000/vgg16_browser_eightbit.json",
+  "control_server_uri": "ws://hishiko:2525",
+  "variable_server_uri": "http://hishiko:2526",
+  "use_cl": true,
+  "batch_division_size": 32
+}
