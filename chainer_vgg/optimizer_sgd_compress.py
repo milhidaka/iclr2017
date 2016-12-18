@@ -24,7 +24,8 @@ class MomentumSGDCompress(MomentumSGD):
         xp = cuda.get_array_module(param.data)
         with cuda.get_device(param.data):
             state['v'] = xp.zeros_like(param.data)
-            state['t'] = xp.array(param.data)#true weight
+            state['t'] = xp.zeros_like(param.data)#true weight
+            state['first'] = np.zeros(1, dtype=np.int32)
 
     def update_one_cpu(self, param, state):
         v = state['v']
@@ -33,18 +34,21 @@ class MomentumSGDCompress(MomentumSGD):
         comp_grad = compress_decompress(param.grad)
         v -= self.lr * comp_grad
         t += v
-        param.data[:] = compress_decompress(t)
+        param.data[...] = compress_decompress(t)
 
     def update_one_gpu(self, param, state):
         grad_cpu = param.grad.get()
         comp_grad = compress_decompress(grad_cpu)
-        param.grad[:] = cuda.cupy.array(comp_grad)
+        param.grad[...] = cuda.cupy.array(comp_grad)
+        if state['first'][0] == 0:
+            state['first'][0] = 1
+            state['t'][:] = param.data
         cuda.elementwise(
             'T grad, T lr, T momentum',
             'T param, T v',
             '''v = momentum * v - lr * grad;
                param += v;''',
-            'momentum_sgd')(param.grad, self.lr, self.momentum,
+            'momentum_sgd_compress')(param.grad, self.lr, self.momentum,
                             state['t'], state['v'])
         comp_data = compress_decompress(state['t'].get())
-        param.data[:] = cuda.cupy.array(comp_data)
+        param.data[...] = cuda.cupy.array(comp_data)
