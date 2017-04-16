@@ -36,7 +36,7 @@ $(function () {
   });
 
   $("#load-net").click(function () {
-    load_network_net("/lenet_core.json?d=" + (Date.now()), "/lenet_invert_1000?d=" + (Date.now()), function(){});
+    load_network_net("lenet_core.json?d=" + (Date.now()), "lenet_invert_1000?d=" + (Date.now()), function(){});
     return false;
   });
 

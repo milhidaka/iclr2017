@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-N_CLIENTS = 4
+N_CLIENTS = 1
 
 net = "vgg16"
 if net == "vgg11":
@@ -28,7 +28,7 @@ elif net == "vgg16":
     INITIAL_WEIGHT = "/data/unagi0/hidaka/sukiyaki2/initial_model/vgg16_initial_from_vgg11.d8"
     LR = 1e-3
 elif net == "mnist":
-    BATCH_SIZE = 128
+    BATCH_SIZE = 120
     MODEL_SAVE_ITER = 100
     DATASET_PREFIX = "/home/mil/hidaka/git/sukiyaki2/mnist/mnist_train_8bit"
     DATA_RAW_SHAPE = (1, 28, 28)
@@ -36,7 +36,7 @@ elif net == "mnist":
     DATA_AUG_SCALE = 0.00390625
     DATA_AUG_CENTER = True
     DATA_MEAN_FILE = None
-    WEIGHT_PACK_PARAM_FILE = "../netdef/lenet_size_eightbit.json"
+    WEIGHT_PACK_PARAM_FILE = "../netdef/lenet_size_raw.json"
     LR = 1e-2
     #WEIGHT_PACK_PARAM_FILE = "../netdef/lenet_size_raw.json"
     #INITIAL_WEIGHT = "/var/tmp/lenet_initial.d8"
